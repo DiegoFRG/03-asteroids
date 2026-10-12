@@ -6,3 +6,13 @@ Se crea una nueva pestaña de terminal
 
 Prompt nueva funcionalidad:
 Agregamos un nuevo feature o power-up a nuestro juego que se va a llamar "Velocidad", el cual va a permitirle al personaje moverse el doble de rápido durante 5 segundos
+
+> git add .
+> git commit -m "Comentario"
+> git checkout main
+> git merge 01-power-velocidad
+
+Tarea
+Implementar un asteroide especial "estrella fugaz", que se mueve más rápido de lo normal pero desaparece con el tiempo.
+> git checkout -b 01-estrella-fugaz
+> git branch -d 01-estrella-fugaz 01-power-velocidad

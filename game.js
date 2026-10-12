@@ -63,27 +63,48 @@ const SPEEDS = [0, 85, 55, 32];   // velocidad base por tamaño
 const POINTS = [0, 100, 50, 20];  // puntos por tamaño
 
 class Asteroid {
-  constructor(x, y, size = 3) {
+  constructor(x, y, size = 3, isShootingStar = false) {
     this.x    = x;
     this.y    = y;
     this.size = size;
-    this.radius = RADII[size];
+    this.isShootingStar = isShootingStar;
     this.dead = false;
 
-    const angle = rand(0, Math.PI * 2);
-    const speed = SPEEDS[size] + rand(-15, 15);
-    this.vx = Math.cos(angle) * speed;
-    this.vy = Math.sin(angle) * speed;
-    this.rotSpeed = rand(-1.2, 1.2);
-    this.rot = rand(0, Math.PI * 2);
+    if (this.isShootingStar) {
+      this.radius = 14;
+      const angle = rand(0, Math.PI * 2);
+      const speed = 200 + rand(-20, 20); // Más rápido que asteroides normales
+      this.vx = Math.cos(angle) * speed;
+      this.vy = Math.sin(angle) * speed;
+      this.rotSpeed = rand(-1.8, 1.8);
+      this.rot = rand(0, Math.PI * 2);
+      this.ttl = rand(4, 6); // Desaparece entre 4 y 6 segundos
 
-    // Polígono irregular
-    const n = randInt(8, 13);
-    this.verts = [];
-    for (let i = 0; i < n; i++) {
-      const a = (i / n) * Math.PI * 2;
-      const r = this.radius * rand(0.6, 1.0);
-      this.verts.push([Math.cos(a) * r, Math.sin(a) * r]);
+      // Polígono irregular más alargado
+      const n = randInt(6, 9);
+      this.verts = [];
+      for (let i = 0; i < n; i++) {
+        const a = (i / n) * Math.PI * 2;
+        const r = this.radius * rand(0.6, 1.0);
+        this.verts.push([Math.cos(a) * r, Math.sin(a) * r]);
+      }
+    } else {
+      this.radius = RADII[size];
+      const angle = rand(0, Math.PI * 2);
+      const speed = SPEEDS[size] + rand(-15, 15);
+      this.vx = Math.cos(angle) * speed;
+      this.vy = Math.sin(angle) * speed;
+      this.rotSpeed = rand(-1.2, 1.2);
+      this.rot = rand(0, Math.PI * 2);
+
+      // Polígono irregular
+      const n = randInt(8, 13);
+      this.verts = [];
+      for (let i = 0; i < n; i++) {
+        const a = (i / n) * Math.PI * 2;
+        const r = this.radius * rand(0.6, 1.0);
+        this.verts.push([Math.cos(a) * r, Math.sin(a) * r]);
+      }
     }
   }
 
@@ -91,9 +112,14 @@ class Asteroid {
     this.x   = wrap(this.x + this.vx * dt, W);
     this.y   = wrap(this.y + this.vy * dt, H);
     this.rot += this.rotSpeed * dt;
+    if (this.isShootingStar) {
+      this.ttl -= dt;
+      if (this.ttl <= 0) this.dead = true;
+    }
   }
 
   split() {
+    if (this.isShootingStar) return [];
     if (this.size <= 1) return [];
     return [
       new Asteroid(this.x, this.y, this.size - 1),
@@ -105,15 +131,43 @@ class Asteroid {
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.rot);
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth   = 1.5;
-    ctx.lineJoin    = 'round';
-    ctx.beginPath();
-    ctx.moveTo(this.verts[0][0], this.verts[0][1]);
-    for (let i = 1; i < this.verts.length; i++)
-      ctx.lineTo(this.verts[i][0], this.verts[i][1]);
-    ctx.closePath();
-    ctx.stroke();
+
+    if (this.isShootingStar) {
+      const blink = this.ttl < 1.5 && Math.floor(this.ttl * 8) % 2 === 0;
+      if (!blink) {
+        // Estela
+        ctx.save();
+        ctx.rotate(this.rot + Math.PI);
+        ctx.strokeStyle = 'rgba(255, 215, 0, 0.15)';
+        ctx.lineWidth   = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(this.radius + 8, 0);
+        ctx.lineTo(this.radius * 2.5, 0);
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.strokeStyle = '#ffd700';
+        ctx.lineWidth   = 1.5;
+        ctx.lineJoin    = 'round';
+        ctx.beginPath();
+        ctx.moveTo(this.verts[0][0], this.verts[0][1]);
+        for (let i = 1; i < this.verts.length; i++)
+          ctx.lineTo(this.verts[i][0], this.verts[i][1]);
+        ctx.closePath();
+        ctx.stroke();
+      }
+    } else {
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth   = 1.5;
+      ctx.lineJoin    = 'round';
+      ctx.beginPath();
+      ctx.moveTo(this.verts[0][0], this.verts[0][1]);
+      for (let i = 1; i < this.verts.length; i++)
+        ctx.lineTo(this.verts[i][0], this.verts[i][1]);
+      ctx.closePath();
+      ctx.stroke();
+    }
+
     ctx.restore();
   }
 }
@@ -300,7 +354,12 @@ function spawnAsteroids(count) {
       x = rand(0, W);
       y = rand(0, H);
     } while (Math.hypot(x - W / 2, y - H / 2) < SAFE_DIST);
-    asteroids.push(new Asteroid(x, y, 3));
+    // 12% de probabilidad de spawn una estrella fugaz
+    if (Math.random() < 0.12) {
+      asteroids.push(new Asteroid(x, y, 3, true));
+    } else {
+      asteroids.push(new Asteroid(x, y, 3));
+    }
   }
 }
 
@@ -387,10 +446,15 @@ function update(dt) {
       if (!a.dead && !b.dead && dist(b, a) < a.radius) {
         b.dead = true;
         a.dead = true;
-        score += POINTS[a.size];
-        explode(a.x, a.y, a.size * 5);
-        if (Math.random() < 0.2) powerUps.push(new PowerUp(a.x, a.y));
-        newAsteroids.push(...a.split());
+        if (a.isShootingStar) {
+          score += 150;
+          explode(a.x, a.y, 10);
+        } else {
+          score += POINTS[a.size];
+          explode(a.x, a.y, a.size * 5);
+          if (Math.random() < 0.2) powerUps.push(new PowerUp(a.x, a.y));
+          newAsteroids.push(...a.split());
+        }
       }
     }
   }
