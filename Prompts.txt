@@ -45,3 +45,14 @@ Para unir los worktrees se sugiere una rama de unión para no afectar la rama ma
 
 > git checkout main
 > git merge 01-union-worktrees
+> git branch -d 01-union-worktrees
+
+Para borrar los worktrees
+> git worktree list
+> git branch
+> git worktree remove .worktrees/01-triple-shot
+> git branch -d 01-triple-shot
+> git worktree remove .worktrees/02-skins
+> git branch -d 02-skins
+> git worktree remove .worktrees/03-shield
+> git branch -d 03-shield
