@@ -620,29 +620,28 @@ function drawHUD() {
   ctx.textAlign = 'left';
   ctx.fillText(`SCORE  ${score}`, 14, 26);
 
+  let hudY = 48;
   if (speedTimer > 0) {
     ctx.fillStyle = '#00e5ff';
-    ctx.fillText(`VELOCIDAD  ${speedTimer.toFixed(1)}s`, 14, 48);
-    ctx.fillStyle = '#fff';
+    ctx.fillText(`VELOCIDAD  ${speedTimer.toFixed(1)}s`, 14, hudY);
+    hudY += 22;
   }
   if (tripleTimer > 0) {
-    const y = speedTimer > 0 ? 70 : 48;
     ctx.fillStyle = '#ffd700';
-    ctx.fillText(`TRIPLE  ${tripleTimer.toFixed(1)}s`, 14, y);
-    ctx.fillStyle = '#fff';
+    ctx.fillText(`TRIPLE  ${tripleTimer.toFixed(1)}s`, 14, hudY);
+    hudY += 22;
   }
-
+  if (shieldTimer > 0) {
+    ctx.fillStyle = '#7cfc00';
+    ctx.fillText(`ESCUDO  ${shieldTimer.toFixed(1)}s`, 14, hudY);
+    hudY += 22;
+  }
   ctx.fillStyle = '#fff';
+
   ctx.textAlign = 'left';
   ctx.font = '13px monospace';
   ctx.fillText(`SKIN: ${SKINS[currentSkin].name}`, 14, H - 16);
   ctx.font = '15px monospace';
-
-  if (shieldTimer > 0) {
-    ctx.fillStyle = '#7cfc00';
-    ctx.fillText(`ESCUDO  ${shieldTimer.toFixed(1)}s`, 14, 70);
-    ctx.fillStyle = '#fff';
-  }
 
   ctx.textAlign = 'center';
   ctx.fillText(`NIVEL ${level}`, W / 2, 26);
