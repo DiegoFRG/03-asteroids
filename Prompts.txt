@@ -1,0 +1,8 @@
+Prompt inicial:
+¿Cómo funciona éste proyecto? ¿Me puedes dar un overview general del mismo?
+
+Se crea una nueva pestaña de terminal
+> git checkout -b 01-power-velocidad
+
+Prompt nueva funcionalidad:
+Agregamos un nuevo feature o power-up a nuestro juego que se va a llamar "Velocidad", el cual va a permitirle al personaje moverse el doble de rápido durante 5 segundos
