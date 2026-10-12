@@ -62,6 +62,27 @@ const RADII  = [0, 16, 30, 50];   // por tamaño 1, 2, 3
 const SPEEDS = [0, 85, 55, 32];   // velocidad base por tamaño
 const POINTS = [0, 100, 50, 20];  // puntos por tamaño
 
+// ── Skins ──────────────────────────────────────────────────────────────────────
+const SKINS = [
+  { name: 'Clásica', color: '#fff' },
+  { name: 'Neón',    color: '#00e5ff' },
+  { name: 'Fuego',   color: '#ff6d00' },
+  { name: 'Tóxico',  color: '#76ff03' },
+  { name: 'Sombra',  color: '#b388ff' },
+  { name: 'Dorada',  color: '#ffd700' },
+];
+
+let currentSkin = 0;
+try {
+  const saved = localStorage.getItem('shipSkin');
+  if (saved !== null) {
+    const idx = parseInt(saved, 10);
+    if (!isNaN(idx) && idx >= 0 && idx < SKINS.length) currentSkin = idx;
+  }
+} catch (e) {
+  currentSkin = 0;
+}
+
 class Asteroid {
   constructor(x, y, size = 3, isShootingStar = false) {
     this.x    = x;
@@ -242,7 +263,7 @@ class Ship {
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.angle);
-    ctx.strokeStyle = tripleTimer > 0 ? '#ffd700' : (speedTimer > 0 ? '#00e5ff' : '#fff');
+    ctx.strokeStyle = tripleTimer > 0 ? '#ffd700' : (speedTimer > 0 ? '#00e5ff' : SKINS[currentSkin].color);
     ctx.lineWidth   = 1.5;
     ctx.lineJoin    = 'round';
 
@@ -447,6 +468,12 @@ function update(dt) {
     bullets.push(...ship.tryShoot());
   }
 
+  // Cambiar skin
+  if (pressed('KeyC')) {
+    currentSkin = (currentSkin + 1) % SKINS.length;
+    try { localStorage.setItem('shipSkin', String(currentSkin)); } catch (e) {}
+  }
+
   if (speedTimer > 0) speedTimer -= dt;
   if (tripleTimer > 0) tripleTimer -= dt;
 
@@ -549,6 +576,12 @@ function drawHUD() {
     ctx.fillText(`TRIPLE  ${tripleTimer.toFixed(1)}s`, 14, y);
     ctx.fillStyle = '#fff';
   }
+
+  ctx.fillStyle = '#fff';
+  ctx.textAlign = 'left';
+  ctx.font = '13px monospace';
+  ctx.fillText(`SKIN: ${SKINS[currentSkin].name}`, 14, H - 16);
+  ctx.font = '15px monospace';
 
   ctx.textAlign = 'center';
   ctx.fillText(`NIVEL ${level}`, W / 2, 26);
