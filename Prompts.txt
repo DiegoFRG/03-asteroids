@@ -16,3 +16,32 @@ Tarea
 Implementar un asteroide especial "estrella fugaz", que se mueve más rápido de lo normal pero desaparece con el tiempo.
 > git checkout -b 01-estrella-fugaz
 > git branch -d 01-estrella-fugaz 01-power-velocidad
+
+## Worktrees manualmente
+
+1. Crear directorio `.worktrees/`
+2. Ejecutar:
+```
+git worktree add .worktrees/<nombre-del-worktree>
+```
+
+## Ahora necesitamos 3 features:
+
+- implementemos un triple shot: Por 5 segundos, el personaje dispara 3 veces en línea recta.
+- implementemos un sistema de skins: Poder cambiar la apariencia de la nave.
+- implementemos un escudo: Un escudo que protege a la nave de los proyectiles enemigos.
+
+> mkdir .worktrees
+> git worktree add .worktrees/01-triple-shot
+> git worktree add .worktrees/02-skins
+> git worktree add .worktrees/03-shield
+
+Para cada worktree se hace su commit
+
+Para unir los worktrees se sugiere una rama de unión para no afectar la rama main
+> git checkout -b 01-union-worktrees
+
+- Necesito que unas los 3 worktrees que tenemos: 01-triple-shot, 02-skins y 03-shield. Una vez terminado no borres los worktrees. Yo voy a hacer eso manualmente.
+
+> git checkout main
+> git merge 01-union-worktrees
